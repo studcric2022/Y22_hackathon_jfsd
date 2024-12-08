@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+      }
+
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #333;
+        padding: 0.5em 1em;
+      }
+
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        margin: 0 1em;
+        font-size: 1em;
+      }
+
+      .navbar a:hover {
+        color: #ff9900;
+      }
+
+      .navbar .logo {
+        font-size: 1.5em;
+        font-weight: bold;
+        color:white;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 3em auto;
+        padding: 2em;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .error {
+        border: 2px solid red;
+      }
+
+      .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-bottom: 0.5em;
+       }
+      
+      .container h1 {
+        margin-bottom: 1.5em;
+        font-size: 1.8em;
+        color: #333;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.8em;
+        margin-bottom: 1.5em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+      }
+
+      .login-btn {
+        background-color: #333;
+        color: white;
+        padding: 0.8em 2em;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+
+      .login-btn:hover {
+        background-color: #ff9900;
+        color:black;
+      }
+      .navbar .login-btn:hover{
+        color:black;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 3em;
+        font-size: 0.9em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="logo">Webinar</div>
+      <div>
+        <a href="#">Home</a>
+        <a href="#">FAQ</a>
+        <a href="#">About</a>
+        <a href="signup.html" class="signup-btn">Sign Up</a>
+        <a href="index.html" class="login-btn">Login</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h1>Enter the Credentials to Log In!</h1>
+      <form>
+        <input
+          type="email"
+          id="un"
+          class="form-input"
+          placeholder="Username"
+        />
+        <input
+          type="password"
+          id="pw"
+          class="form-input"
+          placeholder="Password"
+        />
+        <button type="button" class="login-btn" onclick="login()">
+          Login
+        </button>
+      </form>
+    </div>
+
+
+
+
+
+
+
+    <footer>
+      &copy; 2024 Webinar. All rights reserved.
+    </footer>
+
+    <script type="text/javascript">
+    function login() {
+    	  var username = un.value.trim();
+    	  var password = pw.value.trim();
+
+    	  // Reset previous errors
+    	  resetErrors();
+          if(username === "" && password === ""){
+        	  showError(un, "Username is required.");
+        	  showError(pw, "Password is required.");
+        	  return;
+          }
+    	  // Validate if the fields are empty
+    	  if (username === "") {
+    	    showError(un, "Username is required.");
+    	    return;
+    	  }
+
+    	  if (password === "") {
+    	    showError(pw, "Password is required.");
+    	    return;
+    	  }
+
+    	  // Prepare data for API request
+    	  var data = JSON.stringify({
+    	    username: username,
+    	    password: password,
+    	  });
+
+    	  // Make the API call to validate login
+    	  var url = "http://localhost:8081/user/validate";
+    	  callApi("POST", url, data, getResponse);
+    	}
+    
+    function showError(inputElement, message) {
+    	  inputElement.classList.add("error"); // Add error class to the input
+    	  
+    	  // Check if an error message already exists for this input
+    	  var existingError = inputElement.nextElementSibling;
+    	  if (existingError && existingError.classList.contains("error-message")) {
+    	    existingError.innerText = message; // Update existing error message
+    	    return;
+    	  }
+    	  
+    	  // Create a new error message element
+    	  var errorMessage = document.createElement("div");
+    	  errorMessage.classList.add("error-message");
+    	  errorMessage.innerText = message;
+
+    	  // Insert the error message directly after the input field
+    	  inputElement.parentNode.insertBefore(errorMessage, inputElement.nextSibling);
+    	}
+
+
+    	function resetErrors() {
+    	  // Remove error class and messages
+    	  var errorMessages = document.querySelectorAll(".error-message");
+    	  var errorInputs = document.querySelectorAll(".form-input");
+
+    	  errorMessages.forEach(function (msg) {
+    	    msg.remove();
+    	  });
+
+    	  errorInputs.forEach(function (input) {
+    	    input.classList.remove("error");
+    	  });
+    	}
+
+
+      document.addEventListener("DOMContentLoaded", function() {
+    	  var inputs = document.getElementsByClassName("form-input"); // Get all form input elements
+    	  for (var i = 0; i < inputs.length; i++) {
+    	    inputs[i].addEventListener("keypress", function(event) {
+    	      if (event.key === "Enter") {
+    	        event.preventDefault(); // Prevent form submission
+    	        login(); // Call the login function directly
+    	      }
+    	    });
+    	  }
+    	});
+
+      function getResponse(response) {
+        if (response === "Authorised Admin") {
+        	localStorage.setItem("isLoggedIn", "true");
+        	localStorage.setItem("username", un.value);
+        	localStorage.setItem("resources", JSON.stringify([]));
+
+          window.location.href = "dashboard.html";
+          
+        }
+        else if (response === "Authorised User") {
+        	localStorage.setItem("isLoggedIn", "true");
+        	localStorage.setItem("username", un.value);
+          window.location.href = "user-dashboard.html";
+          
+        }
+        	
+        else {
+          alert("Unauthorized User");
+        }
+      }
+
+      function callApi(METHOD, URL, DATA, responseHandler) {
+        var options;
+        if (METHOD == "GET" || METHOD == "DELETE")
+          options = {
+            method: METHOD,
+            headers: { "Content-Type": "application/json" },
+          };
+        else
+          options = {
+            method: METHOD,
+            headers: { "Content-Type": "application/json" },
+            body: DATA,
+          };
+        fetch(URL, options)
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(response.status + ": " + response.statusText);
+            return response.text();
+          })
+          .then((data) => responseHandler(data))
+          .catch((error) => alert(error));
+      }
+    </script>
+  </body>
+</html>

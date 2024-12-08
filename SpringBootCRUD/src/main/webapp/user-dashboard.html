@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to User DashBoard</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+    }
+     .error {
+        border: 2px solid red; /* Red border for errors */
+      }
+
+      .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: -0.5em;
+        margin-bottom: 1em;
+        text-align: left;
+      }
+
+    .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #333;
+        padding: 0.5em 1em;
+        color: white;
+    }
+
+    .navbar a {
+        color: white;
+        text-decoration: none;
+        margin: 0 1em;
+        font-size: 1em;
+    }
+
+    .navbar a:hover {
+        color: #ff9900;
+    }
+
+    .navbar .logo {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .navbar .username {
+        font-size: 1em;
+        color: #ff9900;
+        font-weight: bold;
+        margin-left: auto;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 2em auto;
+        padding: 2em;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .container h1 {
+        margin-bottom: 1.5em;
+        font-size: 1.8em;
+        color: #333;
+        text-align: center;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.8em;
+        margin-bottom: 0.5em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1em;
+    }
+
+    .btn {
+        background-color: #333;
+        color: white;
+        padding: 0.8em 2em;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+        text-align: center;
+    }
+      .errors {
+        color: red;
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: none; /* Hidden by default */
+    }
+
+    .btn:hover {
+        background-color: #ff9900;
+    }
+
+    #userlist {
+        margin-top: 2em;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1em;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        padding: 0.8em;
+        text-align: center;
+    }
+
+    th {
+        background-color: #f4f4f9;
+        font-weight: bold;
+    }
+    #file-upload {
+        border: 2px dashed #ccc;
+        padding: 1em;
+        text-align: center;
+        margin-top: 2em;
+    }
+    #file-upload input[type="file"] {
+        display: none;
+    }
+    #resource-table {
+        margin-top: 2em;
+        overflow-x: auto;
+    }
+    footer {
+        text-align: center;
+        margin-top: 3em;
+        font-size: 0.9em;
+        color: #666;
+    }
+</style>
+</head>
+<body onload="checkLoginStatus()">
+    <nav class="navbar">
+        <div class="logo">Webinar User Dashboard</div>
+        <div>
+            <a href="#" onclick="showHome()">Home</a>
+            <a href="#" onclick="showFAQ()">FAQ</a>
+            <a href="#" onclick="showAbout()">About</a>
+            <a href="#" onclick="showEvents()">Events</a>
+            <a href="#" onclick="showResources()">Resources</a>
+        </div>
+            <span class="username" id="navbar-username"></span>
+            <a href="index.html" class="btn">Logout</a>
+        </nav>
+
+    <div class="container" id="main-content">
+        <h1>DEMO ON SPRING BOOT CRUD OPERATIONS</h1>
+      
+    </div>
+      <div id="resource-table" class="container" style="display: none;">
+        <h1>Resources</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Resource Name</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody id="resources-list"></tbody>
+        </table>
+    </div>
+
+    <div id="file-upload" class="container" style="display: none;">
+        <h2>Upload New Resource</h2>
+        <div>
+            <label for="resource-file">Drag and drop or browse to upload</label>
+            <input type="file" id="resource-file" onchange="uploadResource()" />
+        </div>
+    </div>
+    <footer>
+        &copy; 2024 Webinar. All rights reserved.
+    </footer>
+
+    <script type="text/javascript">
+    let resources = JSON.parse(localStorage.getItem("resources")) || [];
+
+    function showResources() {
+        const container = document.getElementById("main-content");
+        container.style.display = "none";
+        document.getElementById("resource-table").style.display = "block";
+        const resourcesList = document.getElementById("resources-list");
+        resourcesList.innerHTML = "";
+        resources.forEach((resource) => {
+            resourcesList.innerHTML += `
+                <tr>
+                    <td>${resource.name}</td>
+                    <td><a href="${resource.url}" download><button class="btn">Download</button></a></td>
+                </tr>
+            `;
+        });
+    }
+
+    function uploadResource() {
+        const fileInput = document.getElementById("resource-file");
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const resource = {
+                    name: file.name,
+                    url: e.target.result
+                };
+                resources.push(resource);
+                localStorage.setItem("resources", JSON.stringify(resources));
+                alert("Resource uploaded successfully!");
+                showResources();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("Please select a file to upload.");
+        }
+    }
+    function addResource(){
+    	 const container = document.getElementById("main-content");
+         container.innerHTML = `
+             <h1>Add New Resource</h1>
+             <div id="file-upload" class="container" >
+             <h2>Upload New Resource</h2>
+             <div>
+                 <label for="resource-file">Drag and drop or browse to upload</label>
+                 <input type="file" id="resource-file" onchange="uploadResource()" />
+             </div>
+         </div>
+         `;
+    }
+
+                function showAbout() {
+            const container = document.getElementById("main-content");
+            container.innerHTML = `
+                <h1>About Webinar Dashboard</h1>
+                <p>Welcome to the Webinar Dashboard, a robust platform designed to streamline and enhance your webinar experiences. Here’s what makes us special:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 1em;">
+                    <div style="flex: 1; min-width: 300px;">
+                        <img src="https://via.placeholder.com/300" alt="Webinar Feature" style="width: 100%; border-radius: 8px;">
+                        <h3>Seamless Management</h3>
+                        <p>Manage your webinars with ease using our intuitive dashboard, designed for efficiency and user-friendliness.</p>
+                    </div>
+                    <div style="flex: 1; min-width: 300px;">
+                        <img src="https://via.placeholder.com/300" alt="Webinar Feature" style="width: 100%; border-radius: 8px;">
+                        <h3>Advanced Analytics</h3>
+                        <p>Get detailed insights and analytics to understand your audience and improve engagement.</p>
+                    </div>
+                    <div style="flex: 1; min-width: 300px;">
+                        <img src="https://via.placeholder.com/300" alt="Webinar Feature" style="width: 100%; border-radius: 8px;">
+                        <h3>24/7 Support</h3>
+                        <p>Our dedicated support team is always ready to assist you with any queries or issues.</p>
+                    </div>
+                </div>
+                <p>Experience the future of webinars with our innovative features and seamless integration capabilities.</p>
+            `;
+        }
+
+                function showEvents() {
+                    const container = document.getElementById("main-content");
+                    container.style.display = "block";
+                    document.getElementById("resource-table").style.display = "none";
+
+                    const events = JSON.parse(localStorage.getItem("events")) || []; // Retrieve events from localStorage
+                    const user= localStorage.getItem("username");
+                    let eventTableHTML = `
+                        <h1>Upcoming Events</h1>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Serial No.</th>
+                                    <th>Event</th>
+                                    <th>Date</th>
+                                    <th>Room</th>
+
+                                    <th>Join</th>
+                                    <th>Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventTable">`;
+
+                    // Populate the table with saved events
+                    events.forEach((event, index) => {
+                        eventTableHTML += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${event.name}</td>
+                                <td>${event.date}</td>
+                                <td>${event.roomId}</td>
+                                
+                      
+                                <td><a href="/WEB_UIKITS.html?roomID=${event.roomId}&username=${user}"><button class="btn" id="joinMeetingBtn" >Join</button></a></td>
+                                <td><button class="btn" onclick="deleteEvent(${index})">Delete</button></td>
+                            </tr>
+                        `;
+                    });
+
+                    eventTableHTML += `</tbody></table>`;
+                    container.innerHTML = eventTableHTML;
+                }
+                function handleJoinMeeting(){
+                	const roomId= document.getElementById("meetingName").value;
+                	const user= localStorage.getItem("username");
+               	 window.open(`WEB_UIKITS.html?roomId=${roomId}&username=${user}`,"_blank");
+                }
+                 
+                function deleteEvent(index) {
+                    const events = JSON.parse(localStorage.getItem("events")) || [];
+                    events.splice(index, 1); // Remove the event at the specified index
+                    localStorage.setItem("events", JSON.stringify(events)); // Update localStorage
+                    showEvents(); // Refresh the event table
+                    alert("Event deleted successfully!");
+                }
+
+                function showAddEventForm() {
+                    const container = document.getElementById("main-content");
+                    container.innerHTML = `
+                        <h1>Add New Event</h1>
+                        <form id="addEventForm">
+                            <input type="text" id="eventName" class="form-input" placeholder="Event Name" required />
+                            <span id="eventNameError" class="errors">Event name is required.</span>
+
+                            <input type="date" id="eventDate" class="form-input" required />
+                            <span id="eventDateError" class="errors">Event date is required.</span>
+
+                            <button type="button" class="btn" onclick="addEvent()">Add Event</button>
+                        </form>
+                    `;
+                }
+
+
+        function addEvent() {
+            const eventNameInput = document.getElementById("eventName");
+            const eventDateInput = document.getElementById("eventDate");
+            const eventNameError = document.getElementById("eventNameError");
+            const eventDateError = document.getElementById("eventDateError");
+
+            // Reset error messages
+            eventNameError.style.display = "none";
+            eventDateError.style.display = "none";
+
+            const eventName = eventNameInput.value.trim();
+            const eventDate = eventDateInput.value;
+
+            let isValid = true;
+
+            // Validate event name
+            if (!eventName) {
+                eventNameError.style.display = "block";
+                isValid = false;
+            }
+
+            // Validate event date
+            if (!eventDate) {
+                eventDateError.style.display = "block";
+                isValid = false;
+            }
+
+            if (!isValid) {
+                return;
+            }
+
+            const events = JSON.parse(localStorage.getItem("events")) || [];
+
+            // Add the new event
+            events.push({ name: eventName, date: eventDate });
+
+            localStorage.setItem("events", JSON.stringify(events));
+
+            showEvents();
+            alert("Event added successfully!");
+        }
+
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem("isLoggedIn");
+            const username = localStorage.getItem("username"); // Retrieve username
+            if (isLoggedIn !== "true") {
+                window.location.href = "index.html";
+            } else if (username) {
+                document.getElementById("navbar-username").textContent = `Welcome, ${username}`;
+            }
+        }
+
+        function logout() {
+            // Clear the login state
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("username");
+            window.location.href = "index.html";
+        }
+      
+        function showHome() {
+            const container = document.getElementById("main-content");
+            container.style.display = "block";
+            document.getElementById("resource-table").style.display = "none";
+            document.getElementById("file-upload").style.display = "none";
+            container.innerHTML = `
+                <h1>Admin Dashboard</h1>
+                <div>
+                    <input type="text" id="un" class="form-input" placeholder="Username" required/>
+                    <input type="password" id="pw" class="form-input" placeholder="Password" required/>
+                    
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="readAll()">Read All</button>
+                    <button class="btn" onclick="search()">Search</button>
+                    <button class="btn" onclick="showSaveForm()">Insert/Save</button>
+                    <button class="btn" onclick="showUpdateForm()">Update/Modify</button>
+                    <button class="btn" onclick="deleteUser()">Delete/Remove</button>
+                    <button class="btn" onclick="resetFields()">Reset</button>
+                    <button class="btn" onclick="showAddEventForm()">Events</button>
+                    <button class="btn" onclick="addResource()">Resources</button>
+                </div>
+                <div id="userlist"></div>
+                
+                <div id="resource-table" class="container" style="display:none">
+                <h1>Resources</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resource Name</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resources-list"></tbody>
+                </table>
+            </div>
+
+            <div id="file-upload" class="container"  style="display:none">
+                <h2>Upload New Resource</h2>
+                <div>
+                    <label for="resource-file">Drag and drop or browse to upload</label>
+                    <input type="file" id="resource-file" onchange="uploadResource()" />
+                </div>
+            </div>
+            `;
+        }
+
+        function showFAQ() {
+            const container = document.getElementById("main-content");
+            container.innerHTML = `
+                <h1>Frequently Asked Questions</h1>
+                <ul>
+                    <li><strong>Q:</strong> What is this dashboard for?<br><strong>A:</strong> This dashboard is for managing CRUD operations in a Spring Boot application.</li>
+                    <li><strong>Q:</strong> How do I perform CRUD operations?<br><strong>A:</strong> Use the provided buttons for Read All, Search, Save, Update, and Delete operations.</li>
+                    <li><strong>Q:</strong> Who can use this dashboard?<br><strong>A:</strong> Authorized users who have logged in successfully.</li>
+                    <li><strong>Q:</strong> What should I do if I encounter issues?<br><strong>A:</strong> Contact support or refer to the documentation.</li>
+                </ul>
+            `;
+        }
+
+        function readAll() {
+            var url = "http://localhost:8081/user/getuser";
+            callApi("GET", url, null, generateTable);
+        }
+
+        function search() {
+            var username = document.getElementById('un').value;
+            var url = `http://localhost:8081/user/getuserbyun/${username}`;
+            callApi("GET", url, null, generateTable);
+        }
+
+        function showSaveForm() {
+            const container = document.getElementById("main-content");
+
+            // Change the container content to input fields with required validation
+            container.innerHTML = `
+                <h1>Insert/Save User</h1>
+                <div>
+                    <input type="email" id="un" class="form-input" placeholder="Username" required />
+                    <span id="unError" class="error-message" style="display: none;">Username is required</span>
+                    <input type="password" id="pw" class="form-input" placeholder="Password" required />
+                    <span id="pwError" class="error-message" style="display: none;">Password is required</span>
+                    <input type="text" id="role" class="form-input" placeholder="Role" required />
+                    <span id="roleError" class="error-message" style="display: none;">Role is required</span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="save()">Save</button>
+                    <button class="btn" onclick="resetFields()">Reset</button>
+                </div>
+            `;
+        }
+
+        function showUpdateForm() {
+            const container = document.getElementById("main-content");
+
+            // Change the container content to input fields with required validation
+            container.innerHTML = `
+                <h1>Insert/Save User</h1>
+                <div>
+                    <input type="email" id="un" class="form-input" placeholder="Username" required />
+                    <span id="unError" class="error-message" style="display: none;">Username is required</span>
+                    <input type="password" id="pw" class="form-input" placeholder="Password" required />
+                    <span id="pwError" class="error-message" style="display: none;">Password is required</span>
+                    <input type="text" id="role" class="form-input" placeholder="Role" required />
+                    <span id="roleError" class="error-message" style="display: none;">Role is required</span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="update()">Save</button>
+                    <button class="btn" onclick="resetFields()">Reset</button>
+                </div>
+            `;
+        }
+        function save() {
+            const usernameField = document.getElementById("un");
+            const passwordField = document.getElementById("pw");
+            const roleField = document.getElementById("role");
+
+            let valid = true;
+
+            // Clear previous error messages
+            clearError(usernameField);
+            clearError(passwordField);
+            clearError(roleField);
+
+            // Validate Username
+            if (!usernameField.value.trim()) {
+                showError(usernameField, "Username is required.");
+                valid = false;
+            }
+
+            // Validate Password
+            if (!passwordField.value.trim()) {
+                showError(passwordField, "Password is required.");
+                valid = false;
+            }
+
+            // Validate Role
+            if (!roleField.value.trim()) {
+                showError(roleField, "Role is required.");
+                valid = false;
+            }
+
+            // Proceed if all fields are valid
+            if (valid) {
+                const url = "http://localhost:8081/user/save";
+                const data = JSON.stringify({
+                    username: usernameField.value,
+                    password: passwordField.value,
+                    role: roleField.value,
+                });
+
+                callApi("POST", url, data, getResponse);
+            }
+        }
+
+        function showError(inputElement, message) {
+            inputElement.classList.add("error");
+
+            let errorMessage = inputElement.nextElementSibling;
+            if (!errorMessage || !errorMessage.classList.contains("error-message")) {
+                errorMessage = document.createElement("div");
+                errorMessage.classList.add("error-message");
+                inputElement.parentNode.insertBefore(errorMessage, inputElement.nextSibling);
+            }
+
+            errorMessage.innerText = message;
+        }
+
+        function clearError(inputElement) {
+            inputElement.classList.remove("error");
+            const errorMessage = inputElement.nextElementSibling;
+            if (errorMessage && errorMessage.classList.contains("error-message")) {
+                errorMessage.remove();
+            }
+        }
+
+        function resetFields() {
+            const usernameField = document.getElementById("un");
+            const passwordField = document.getElementById("pw");
+            const roleField = document.getElementById("role");
+
+            // Clear the input fields
+            usernameField.value = "";
+            passwordField.value = "";
+            roleField.value = "";
+
+            // Remove the error styles and error messages
+            clearError(usernameField);
+            clearError(passwordField);
+            clearError(roleField);
+        }
+        function update() {
+        	const usernameField = document.getElementById("un");
+            const passwordField = document.getElementById("pw");
+            const roleField = document.getElementById("role");
+
+            let valid = true;
+
+            // Clear previous error messages
+            clearError(usernameField);
+            clearError(passwordField);
+            clearError(roleField);
+
+            // Validate Username
+            if (!usernameField.value.trim()) {
+                showError(usernameField, "Username is required.");
+                valid = false;
+            }
+
+            // Validate Password
+            if (!passwordField.value.trim()) {
+                showError(passwordField, "Password is required.");
+                valid = false;
+            }
+
+            // Validate Role
+            if (!roleField.value.trim()) {
+                showError(roleField, "Role is required.");
+                valid = false;
+            }
+
+            // Proceed if all fields are valid
+            if (valid) {
+            	 var url = "http://localhost:8081/user/update";
+                 var data = JSON.stringify({
+                     username: document.getElementById('un').value,
+                     password: document.getElementById('pw').value
+                 });}
+
+           
+            callApi("PUT", url, data, getResponse);
+        }
+
+        function deleteUser() {
+            var username = document.getElementById('un').value;
+            var url = `http://localhost:8081/user/delet/${username}`;
+            callApi("DELETE", url, null, getResponse);
+        }
+
+        function resetFields() {
+            document.getElementById('un').value = "";
+            document.getElementById('pw').value = "";
+        }
+
+        function generateTable(response) {
+            var data = JSON.parse(response);
+            var tbl = `<table>
+                            <tr>
+                                <th>Username</th>
+                                <th>Password</th>
+                            </tr>`;
+            for (var x in data) {
+                tbl += `<tr>
+                            <td>${data[x].username}</td>
+                            <td>${data[x].password}</td>
+                        </tr>`;
+            }
+            tbl += `</table>`;
+            document.getElementById('userlist').innerHTML = tbl;
+        }
+
+        function getResponse(response) {
+            alert(response.message || response);
+            location.reload();
+        }
+
+        function callApi(METHOD, URL, DATA, responseHandler) {
+            var options;
+            if (METHOD == "GET" || METHOD == "DELETE") {
+                options = { method: METHOD, headers: { 'Content-Type': 'application/json' } };
+            } else {
+                options = { method: METHOD, headers: { 'Content-Type': 'application/json' }, body: DATA };
+            }
+            fetch(URL, options)
+                .then(response => {
+                    if (!response.ok)
+                        throw new Error(response.status + ": " + response.statusText);
+                    return response.text();
+                })
+                .then(data => responseHandler(data))
+                .catch(error => alert(error));
+        }
+    </script>
+</body>
+</html>

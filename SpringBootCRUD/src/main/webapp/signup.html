@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+      }
+
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #333;
+        padding: 0.5em 1em;
+      }
+
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        margin: 0 1em;
+        font-size: 1em;
+      }
+
+      .navbar a:hover {
+        color: #ff9900;
+      }
+
+      .navbar .logo {
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 3em auto;
+        padding: 2em;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .container h1 {
+        margin-bottom: 1.5em;
+        font-size: 1.8em;
+        color: #333;
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 0.8em;
+        margin-bottom: 1em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+      }
+
+      .error {
+        border: 2px solid red; /* Red border for errors */
+      }
+
+      .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: -0.5em;
+        margin-bottom: 1em;
+        text-align: left;
+      }
+
+      .signup-btn {
+        background-color: #333;
+        color: white;
+        padding: 0.8em 2em;
+        border: none;
+        border-radius: 4px;
+        font-size: 1em;
+        cursor: pointer;
+      }
+
+      .signup-btn:hover {
+        background-color: #ff9900;
+        color: black;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 3em;
+        font-size: 0.9em;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="logo">Webinar</div>
+      <div>
+        <a href="#">Home</a>
+        <a href="#">FAQ</a>
+        <a href="#">About</a>
+        <a href="index.html" class="login-btn">Login</a>
+        <a href="signup.html" class="signup-btn">Sign Up</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h1>Create Your Account</h1>
+      <form>
+        <input
+          type="email"
+          id="un"
+          class="form-input"
+          placeholder="Username"
+        />
+        <div></div>
+        <input
+          type="password"
+          id="pw"
+          class="form-input"
+          placeholder="Password"
+        />
+        <div></div>
+        <input
+          type="text"
+          id="role"
+          class="form-input"
+          placeholder="Role"
+        />
+        <div></div>
+        <button type="button" class="signup-btn" onclick="save()">
+          Sign Up
+        </button>
+      </form>
+    </div>
+
+    <footer>
+      &copy; 2024 Webinar. All rights reserved.
+    </footer>
+
+    <script type="text/javascript">
+      function save() {
+        const usernameField = document.getElementById("un");
+        const passwordField = document.getElementById("pw");
+        const roleField = document.getElementById("role");
+
+        let valid = true;
+
+        // Validate Username
+        if (!usernameField.value.trim()) {
+          showError(usernameField, "Username is required.");
+          valid = false;
+        } else {
+          clearError(usernameField);
+        }
+
+        // Validate Password
+        if (!passwordField.value.trim()) {
+          showError(passwordField, "Password is required.");
+          valid = false;
+        } else {
+          clearError(passwordField);
+        }
+
+        // Validate Role
+        if (!roleField.value.trim()) {
+          showError(roleField, "Role is required.");
+          valid = false;
+        } else {
+          clearError(roleField);
+        }
+
+        // Proceed if all fields are valid
+        if (valid) {
+          var url = "http://localhost:8081/user/save";
+
+          var data = JSON.stringify({
+            username: usernameField.value,
+            password: passwordField.value,
+            role: roleField.value,
+          });
+
+          callApi("POST", url, data, getResponse);
+        }
+      }
+
+      function showError(inputElement, message) {
+        inputElement.classList.add("error");
+
+        let errorMessage = inputElement.nextElementSibling;
+        if (!errorMessage || !errorMessage.classList.contains("error-message")) {
+          errorMessage = document.createElement("div");
+          errorMessage.classList.add("error-message");
+          inputElement.parentNode.insertBefore(errorMessage, inputElement.nextSibling);
+        }
+
+        errorMessage.innerText = message;
+      }
+
+      function clearError(inputElement) {
+        inputElement.classList.remove("error");
+        const errorMessage = inputElement.nextElementSibling;
+        if (errorMessage && errorMessage.classList.contains("error-message")) {
+          errorMessage.remove();
+        }
+      }
+
+      function getResponse(response) {
+        if (response === "User saved successfully.") {
+          alert("Sign Up Successful!");
+          window.location.href = "index.html";
+        } else {
+          alert("Sign Up Failed. Try again.");
+        }
+      }
+
+      function callApi(METHOD, URL, DATA, responseHandler) {
+        var options;
+        if (METHOD === "GET" || METHOD === "DELETE")
+          options = {
+            method: METHOD,
+            headers: { "Content-Type": "application/json" },
+          };
+        else
+          options = {
+            method: METHOD,
+            headers: { "Content-Type": "application/json" },
+            body: DATA,
+          };
+
+        fetch(URL, options)
+          .then((response) => {
+            if (!response.ok)
+              throw new Error(response.status + ": " + response.statusText);
+            return response.text();
+          })
+          .then((data) => responseHandler(data))
+          .catch((error) => alert(error));
+      }
+    </script>
+  </body>
+</html>
