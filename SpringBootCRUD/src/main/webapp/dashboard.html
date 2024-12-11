@@ -497,13 +497,13 @@
         }
 
         function readAll() {
-            var url = "http://localhost:8081/user/getuser";
+            var url = "https://y22hackathonjfsd-production.up.railway.app/user/getuser";
             callApi("GET", url, null, generateTable);
         }
 
         function search() {
             var username = document.getElementById('un').value;
-            var url = `http://localhost:8081/user/getuserbyun/${username}`;
+            var url = `https://y22hackathonjfsd-production.up.railway.app/user/getuserbyun/${username}`;
             callApi("GET", url, null, generateTable);
         }
 
@@ -580,7 +580,7 @@
 
             // Proceed if all fields are valid
             if (valid) {
-                const url = "http://localhost:8081/user/save";
+                const url = "https://y22hackathonjfsd-production.up.railway.app/user/save";
                 const data = JSON.stringify({
                     username: usernameField.value,
                     password: passwordField.value,
@@ -659,7 +659,7 @@
 
             // Proceed if all fields are valid
             if (valid) {
-            	 var url = "http://localhost:8081/user/update";
+            	 var url = "https://y22hackathonjfsd-production.up.railway.app/user/update";
                  var data = JSON.stringify({
                      username: document.getElementById('un').value,
                      password: document.getElementById('pw').value
@@ -671,7 +671,7 @@
 
         function deleteUser() {
             var username = document.getElementById('un').value;
-            var url = `http://localhost:8081/user/delet/${username}`;
+            var url = `https://y22hackathonjfsd-production.up.railway.app/user/delet/${username}`;
             callApi("DELETE", url, null, getResponse);
         }
 
